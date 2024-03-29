@@ -1,154 +1,67 @@
-import logo from "./logo.svg";
-import "./App.css";
-import { useEffect, useState } from "react";
-import { createHash } from 'crypto';
-
+import logo from './logo.svg';
+import './App.css';
+import { useEffect, useState } from 'react';
+import { initializeEncryption } from './services/AesGcmEncryption';
+import { generateBasicAuthHeader } from './services/BasicAuthHashing';
+import { getUsers } from './services/ApiService';
+import CircularProgress from '@mui/material/CircularProgress';
+import CustomProgressDialog from './components/CustomProgressDialog';
+import { SnackbarProvider } from 'notistack';
+import { Box, Button } from '@mui/material';
+import SnackbarComponent, { AdvanceSnackBar, BasicSnackBar } from './components/SnackBar';
 
 function App() {
+  const [clientInfo, setClientInfo] = useState(null);
 
-  const signInData = {
-    imeiNumber: "",
-    isAutoLogin: "N",
-    loginId: "pdc_dealer",
-    password: "xm1234",
-  };
 
-  const keyBase64 = "U+M3HkGeOvIs2JVlJso1zw==";
-  const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
+  // api variables
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [users, setUsers] = useState([]);
+
+
  
-  function getHashedPassword(passwordToHash, salt) {
-    let generatedPassword = null;
-    try {
-      const md5Hash = createHash('md5');
-      md5Hash.update(salt);
-      md5Hash.update(passwordToHash);
-      const hashResult = md5Hash.digest();
-      const base64Encoded = Buffer.from(hashResult).toString('base64');
-      generatedPassword = base64Encoded.replace(/\n/g, ''); // Remove newline characters
-      console.log("generatedPassword==========="+generatedPassword)
-    } catch (error) {
-      console.error('Hashing error:', error);
-    }
-    return generatedPassword;
-  }
+ 
+useEffect(() => {
 
-  useEffect(() => {
+     //generateBasicAuthHeader()
 
-    const userName = 'ymcauser';
-    const password = 'password';
-    const requestId = '88888888';
-
-
-   const hashedPassword = getHashedPassword(password,requestId)
-    const newString = userName+':'+hashedPassword;
-    const encodedString = btoa(newString);
-    const  finalString = encodedString.replace(/\n/g, ''); // Remove newline characters
-     console.log("Encoded string:", finalString);
-
-    InitializeEncryption();
-
-  }, []);
-
-  function InitializeEncryption() {
-   
-    encryptData(keyBase64, JSON.stringify(signInData), rawIv)
-      .then((encryptedData) => {
-        console.log(encryptedData);
+    // initializeEncryption()
+    
+    getUsers()
+      .then((response) => {
+        setUsers(response.data.users);
+        console.log("response.data====="+JSON.stringify(response.data))
+        console.log("response.data====="+response.data.users[0].firstName)
+        setLoading(false); // Hide the progress dialog
+      
       })
       .catch((error) => {
-        console.error(error);
-      });
-  }
-
-  
-
-  async function encryptData(keyBase64, data, ivBase64) {
-    const algorithm = { name: "AES-GCM", length: 128 };
-
-    const keyBuffer = convertStringIntoBase64ToUint8Array(keyBase64);
-    // Import key
-    const key = await window.crypto.subtle.importKey(
-      "raw",
-      keyBuffer,
-      // { name: "AES-GCM" },
-      algorithm,
-      false,
-      ["encrypt"]
-    );
-
-    const iv = convertStringIntoBase64ToUint8Array(ivBase64);
-
-    // Convert data to ArrayBuffer
-    const dataBuffer = new TextEncoder().encode(data);
-
-    // Encrypt data
-    const encryptedData = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv },
-      key,
-      dataBuffer
-    );
-
-    // Encode the encrypted data to Base64
-    const encryptedBytes = new Uint8Array(encryptedData);
-    return btoa(String.fromCharCode(...encryptedBytes));
-  }
-
-  function convertStringIntoBase64ToUint8Array(base64String) {
-    const binaryString = atob(base64String);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
-  }
-
-  // Function to decrypt data using AES-GCM
-  async function decryptData(encryptedData, keyRaw) {
+        console.log("error.data====="+error)
+        setError('Error fetching users: '+error);
     
-    const keyArrayBuffer = convertStringIntoBase64ToUint8Array(keyRaw);
+      });
+  
+ }, []);
 
-    // Import key
-    const key = await window.crypto.subtle.importKey(
-      "raw",
-      keyArrayBuffer,
-      { name: "AES-GCM" },
-      //algorithm,
-      false,
-      ["decrypt"]
-    );
-
-    const iV = convertStringIntoBase64ToUint8Array(rawIv);
-
-    const decryptedData = await window.crypto.subtle.decrypt(
-      {
-        name: "AES-GCM",
-        iv: iV,
-      },
-      key,
-      encryptedData.ciphertext
-    );
-
-    return new TextDecoder().decode(decryptedData);
-  }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box>
+       {/* <SnackbarProvider maxSnack={3}> */}
+      <CustomProgressDialog open={loading} />
+     
+     
+    
+      <h1>User List</h1>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>{user.firstName}</li>
+        ))}
+      </ul>
+      {/* </SnackbarProvider> */}
+    </Box>
   );
-}
+};
 
 export default App;
+   
