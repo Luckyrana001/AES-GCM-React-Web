@@ -3,12 +3,10 @@ import './App.css';
 import { useEffect, useState } from 'react';
 import { initializeEncryption } from './services/AesGcmEncryption';
 import { generateBasicAuthHeader } from './services/BasicAuthHashing';
-import { getUsers } from './services/ApiService';
+import { getBasicAuth, getUsers } from './services/ApiService';
 import CircularProgress from '@mui/material/CircularProgress';
 import CustomProgressDialog from './components/CustomProgressDialog';
-import { SnackbarProvider } from 'notistack';
 import { Box, Button } from '@mui/material';
-import SnackbarComponent, { AdvanceSnackBar, BasicSnackBar } from './components/SnackBar';
 
 function App() {
   const [clientInfo, setClientInfo] = useState(null);
@@ -18,21 +16,24 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
+  const [basicAuth, setBasicAuth] = useState([]);
 
+ // const { token, login, logout, isAuthenticated } = useAuth();
+// const { user, login, logout } = useAuth();
 
- 
- 
 useEffect(() => {
 
-     //generateBasicAuthHeader()
+     generateBasicAuthHeader()
 
-    // initializeEncryption()
+     initializeEncryption()
+
+   
+
     
     getUsers()
       .then((response) => {
         setUsers(response.data.users);
-        console.log("response.data====="+JSON.stringify(response.data))
-        console.log("response.data====="+response.data.users[0].firstName)
+                console.log("response.data====="+response.data.users[0].firstName)
         setLoading(false); // Hide the progress dialog
       
       })
@@ -41,25 +42,50 @@ useEffect(() => {
         setError('Error fetching users: '+error);
     
       });
+
+
+
+      getBasicAuth(true) 
+      .then((response) => {
+        setBasicAuth(response.data.users);
+        console.log("getBasicAuth.data====="+JSON.stringify(response.data))
+        setLoading(false); // Hide the progress dialog
+      
+      })
+      .catch((error) => {
+        console.log("error.data====="+error)
+        setError('Error fetching users: '+error);
+    
+      });
+
+     
   
  }, []);
 
 
   return (
     <Box>
-       {/* <SnackbarProvider maxSnack={3}> */}
+    
       <CustomProgressDialog open={loading} />
      
-     
-    
+      {/* <div>
+      {isAuthenticated() ? (
+        <p>Authenticated. Token: {token}</p>
+      ) : (
+        <button onClick={() => login('dummy-token')}>Login</button>
+      )}
+      <button onClick={logout}>Logout</button>
+    </div>
+     */}
       <h1>User List</h1>
       <ul>
         {users.map((user) => (
           <li key={user.id}>{user.firstName}</li>
         ))}
       </ul>
-      {/* </SnackbarProvider> */}
+     
     </Box>
+   
   );
 };
 
