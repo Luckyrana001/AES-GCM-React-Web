@@ -1,0 +1,26 @@
+.connection-status {
+    width: 100%;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: "Montserrat", montserrat;
+  }
+
+  .connection-paragraph {
+    color: white;
+  font-size: 12px;
+  }
+
+  body {
+    font-family: "Montserrat";
+  }
+  
+  .connection-status.online {
+    background-color: green;
+  }
+  
+  .connection-status.offline {
+    background-color: rgb(210, 60, 83);
+  }

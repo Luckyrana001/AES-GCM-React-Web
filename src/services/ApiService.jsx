@@ -61,7 +61,7 @@ return instance.get('/auth/BasicAuth/88888888/88888888',{headers});
 };
 
 export const getUsers = () => {
-    return instance2.get('/users');
+    return instance2.get('/users?delay=1000');
   };
   
 export const createUser = (userData) => {
