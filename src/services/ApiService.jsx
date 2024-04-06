@@ -1,15 +1,22 @@
 // apiService.js
 import axios from 'axios';
 import { generateBasicAuthHeader } from './BasicAuthHashing';
-const baseUrl = process.env.REACT_APP_YES_SHOP_ADMIN_BASE_URL;
-const dummyApiBaseUrl = process.env.REACT_APP_YES_SHOP_ADMIN_DUMMY_API_BASE_URL;
+import config from '../configration/config';
+
+const baseUrl = config.apiBaseUrl;
+const dummyApiBaseUrl = config.dummyApiBaseUrl;
+
+
+
+//const baseUrl = process.env.REACT_APP_BASE_URL_IOT;
+//const dummyApiBaseUrl = process.env.REACT_APP_DUMMY_API_BASE_URL_IOT;
 
 const instance = axios.create({
 
-  baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl,
-  //baseURL: baseUrl,
+  //baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl,
+  baseURL: baseUrl,
   // other default configurations
-  timeout: 60000, // Request timeout in milliseconds (60 seconds)
+  timeout: 20000, // Request timeout in milliseconds (20 seconds)
   headers: {
     'Content-Type': 'application/json', // Default content type for requests
    // 'Authorization': 'Authorization' +generateBasicAuthHeader, // Default authorization header

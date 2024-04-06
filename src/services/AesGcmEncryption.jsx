@@ -20,7 +20,7 @@ const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
    
     encryptData(keyBase64, JSON.stringify(signInData), rawIv)
       .then((encryptedData) => {
-        console.log("encryptedData-------   "+encryptedData);
+        console.log("encrypted login data-------   "+encryptedData);
       })
       .catch((error) => {
         console.error(error);

@@ -9,6 +9,7 @@ import ConnectionStatus from './Utility/ConnectionStatus';
 import { SnackbarProvider, useSnackbar } from 'notistack';
 import UseOnlineStatus from './Utility/UseOnlineStatus';
 import CustomDialog from './Utility/CustomDialog';
+import config from './configration/config';
 
 function App() {
   const isOnline = UseOnlineStatus();
@@ -25,7 +26,7 @@ function App() {
 
 useEffect(() => {
 
-
+  console.log(config.apiBaseUrl); // This will print the appropriate API URL based on the environment
   if (isOnline) {
     enqueueSnackbar('Internet is not available', { variant: 'error' });
   }
@@ -51,29 +52,33 @@ useEffect(() => {
         setError('Error fetching users: '+error);
     
       });
-
-
-      if(isOnline){
-      getBasicAuth(true) 
-      .then((response) => {
-        setBasicAuth(response.data.users);
-        console.log("getBasicAuth.data====="+JSON.stringify(response.data))
-        //setLoading(false); // Hide the progress dialog
-      
-      })
-      .catch((error) => {
-        console.log("error.data====="+error)
-        //setError('Error fetching users: '+error);
-    
-      });
-    }
     
   }
+
      
 
   showNoInternetSnackBar();
   
  }, [isOnline, enqueueSnackbar]);
+
+
+ const requestBasicAuth = () => {
+  if (isOnline) {
+    getBasicAuth(true) 
+    .then((response) => {
+      setBasicAuth(response.data.users);
+      console.log("getBasicAuth.data====="+JSON.stringify(response.data))
+      //setLoading(false); // Hide the progress dialog
+    
+    })
+    .catch((error) => {
+      console.log("error.data====="+error)
+      //setError('Error fetching users: '+error);
+  
+    });
+    enqueueSnackbar('You are online');
+  }
+ }
 
 
  const showNoInternetSnackBar = () => {
