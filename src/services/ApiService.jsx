@@ -1,78 +1,45 @@
-// apiService.js
-import axios from 'axios';
-import { generateBasicAuthHeader } from './BasicAuthHashing';
-import config from '../configration/config';
+import axios from "axios";
+import { generateBasicAuthHeader } from "./BasicAuthHashing";
+import config from "../configration/config";
 
 const baseUrl = config.apiBaseUrl;
 const dummyApiBaseUrl = config.dummyApiBaseUrl;
 
-
-
-//const baseUrl = process.env.REACT_APP_BASE_URL_IOT;
-//const dummyApiBaseUrl = process.env.REACT_APP_DUMMY_API_BASE_URL_IOT;
-
 const instance = axios.create({
-
-  //baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl,
+  //baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl, // proxy server path attached in front
   baseURL: baseUrl,
-  // other default configurations
-  timeout: 20000, // Request timeout in milliseconds (20 seconds)
+  timeout: 20000, 
   headers: {
-    'Content-Type': 'application/json', // Default content type for requests
-   // 'Authorization': 'Authorization' +generateBasicAuthHeader, // Default authorization header
+    "Content-Type": "application/json", 
   },
 });
 
 const instance2 = axios.create({
-
   baseURL: dummyApiBaseUrl,
-  // other default configurations
-  timeout: 60000, // Request timeout in milliseconds (60 seconds)
+  timeout: 60000,
   headers: {
-    'Content-Type': 'application/json', // Default content type for requests
-   // 'Authorization': 'Authorization' +generateBasicAuthHeader, // Default authorization header
+    "Content-Type": "application/json", 
   },
 });
 
 
-
-// export const getUsers = async () => {
-//   try {
-//         const response = await instance.get('/users');
-//         console.log('Response:', response.data);
-//         return  response.data;
-//     } catch (error) {
-//         console.error('Error:', error);
-//         return  '';
-//     }
-// };
-
-
 export const getBasicAuth = () => {
-// Define headers object
-let headers = {};
-
-// Conditionally include authorization header
-// if (includeAuthorizationHeader) {
-
-  const headerTokken = generateBasicAuthHeader();
-  // Set your authorization token here
-  const authToken = 'BASIC '+headerTokken;
-  headers['Authorization'] = authToken;
-  //headers['Authorization'] = 'BASIC eW1jYXVzZXI6MnhKeHp3RUdzaDNTNFF2RUMvZWRwZz09';
-
-  
-//}
-
-return instance.get('/auth/BasicAuth/88888888/88888888',{headers});
+  let headers = {};
+  // Conditionally include authorization header
+  if (includeAuthorizationHeader) {
+    const headerTokken = generateBasicAuthHeader();
+    // Set your authorization token here
+    const authToken = "BASIC " + headerTokken;
+    headers["Authorization"] = authToken;
+    //headers['Authorization'] = 'BASIC eW1jYXVzZXI6MnhKeHp3RUdzaDNTNFF2RUMvZWRwZz09';
+  }
+  return instance.get(process.env.REACT_APP_BASIC_AUTH_API_URL, { headers });
 };
 
 export const getUsers = () => {
-    return instance2.get('/users?delay=1000');
-  };
-  
-export const createUser = (userData) => {
-  return instance.post('/users', userData);
+  return instance2.get(process.env.REACT_APP_USER_API_URL);
 };
 
-// Other API service functions...
+export const createUser = (userData) => {
+  return instance.post("/users", userData);
+};

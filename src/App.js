@@ -12,13 +12,13 @@ import CustomDialog from './Utility/CustomDialog';
 import config from './configration/config';
 
 function App() {
-  const isOnline = UseOnlineStatus();
+  const isNetworkConnectionAvailable = UseOnlineStatus();
   const { enqueueSnackbar } = useSnackbar();
   
   // api variables
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [users, setUsers] = useState([]);
+  const [getUser, setUsers] = useState([]);
   const [basicAuth, setBasicAuth] = useState([]);
 
  // const { token, login, logout, isAuthenticated } = useAuth();
@@ -26,24 +26,24 @@ function App() {
 
 useEffect(() => {
 
-  console.log(config.apiBaseUrl); // This will print the appropriate API URL based on the environment
-  if (isOnline) {
+
+  if (isNetworkConnectionAvailable) {
     enqueueSnackbar('Internet is not available', { variant: 'error' });
   }
 
-     //generateBasicAuthHeader()
-     if(isOnline){
+     
+     if(isNetworkConnectionAvailable){
       initializeEncryption()
      } 
-   
-
-   
-
-     if(isOnline){
+     
+     if(isNetworkConnectionAvailable ){
        getUsers()
       .then((response) => {
         setUsers(response.data.users);
-                console.log("response.data====="+response.data.users[0].firstName)
+       
+        console.log("response.data====="+response.data.users[0].firstName)
+       // console.log("getUser[0]========"+JSON.stringify(getUser)); 
+
         setLoading(false); // Hide the progress dialog
       
       })
@@ -54,16 +54,13 @@ useEffect(() => {
       });
     
   }
-
-     
-
   showNoInternetSnackBar();
   
- }, [isOnline, enqueueSnackbar]);
+ }, [isNetworkConnectionAvailable, enqueueSnackbar]);
 
-
+// Generate Basic Auth hHeader()
  const requestBasicAuth = () => {
-  if (isOnline) {
+  if (isNetworkConnectionAvailable) {
     getBasicAuth(true) 
     .then((response) => {
       setBasicAuth(response.data.users);
@@ -82,7 +79,7 @@ useEffect(() => {
 
 
  const showNoInternetSnackBar = () => {
-  if (isOnline) {
+  if (isNetworkConnectionAvailable) {
     enqueueSnackbar('You are online');
   } else {
     enqueueSnackbar('You are offline', { autoHideDuration: 3000, variant: 'error' });
@@ -97,7 +94,7 @@ useEffect(() => {
       <ConnectionStatus />
     
 
-      {isOnline ? (
+      {isNetworkConnectionAvailable ? (
       <CustomProgressDialog open={loading} />
       ) : (
         showNoInternetSnackBar()
@@ -110,7 +107,7 @@ useEffect(() => {
      
       <h1>User List</h1>
       <ul>
-        {users.map((user) => (
+        {getUser.map((user) => (
           <li key={user.id}>{user.firstName}</li>
         ))}
       </ul>
