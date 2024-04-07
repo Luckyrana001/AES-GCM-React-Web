@@ -1,7 +1,11 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 import { initializeEncryption } from "./services/AesGcmEncryption";
-import { getBasicAuth, getUsers } from "./services/ApiService";
+import {
+  getBasicAuth,
+  getUserLoginDetails,
+  getUsers,
+} from "./services/ApiService";
 import CustomProgressDialog from "./components/CustomProgressDialog";
 import { Box, Button } from "@mui/material";
 import ConnectionStatus from "./Utility/ConnectionStatus";
@@ -18,9 +22,10 @@ function App() {
   const { enqueueSnackbar } = useSnackbar();
 
   // api variables
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [getUser, setUsers] = useState([]);
+  const [getProgressbarText, setProgressbarText] = useState("");
 
   useEffect(() => {
     // initializeEncryption()
@@ -33,6 +38,8 @@ function App() {
 
   const getUserInfo = () => {
     if (isNetworkConnectionAvailable) {
+      setProgressbarText("Loading User ...")
+      setLoading(true)
       getUsers()
         .then((response) => {
           setUsers(response.data.users);
@@ -45,6 +52,7 @@ function App() {
         .catch((error) => {
           console.log("error.data=====" + error);
           setError("Error fetching users: " + error);
+          setLoading(false)
         });
     }
   };
@@ -58,13 +66,11 @@ function App() {
           saveToLocalStorage("messageKey", response.data.messageKey);
           saveToLocalStorage("basicAuthToken", response.data.basicAuthToken);
 
-          const basicAuthToken = getFromLocalStorage("basicAuthToken");
-          const messageKey = getFromLocalStorage("messageKey");
-          //setLoading(false); // Hide the progress dialog
         })
         .catch((error) => {
           console.log("error in BasicAuth=====" + error);
           //setError('Error fetching users: '+error);
+          
         });
       enqueueSnackbar("You are online");
     }
@@ -81,10 +87,12 @@ function App() {
     }
   };
 
-  const doLogin = async () => {
+  const doSignUp = async () => {
     try {
+    
       if (isNetworkConnectionAvailable) {
-        // setLoading(true) // Hide the progress dialog
+        setProgressbarText("Authenticating, Please wait...")
+         setLoading(true) // Hide the progress dialog
 
         const imeiNumber = "23423423423";
         const isAutoLogin = "N";
@@ -106,6 +114,7 @@ function App() {
             const signInReqestData = {
               requestId: generateRequestId(),
               loginId: "ymcauser",
+              sessionId: "",
               basicAuthToken: getFromLocalStorage("basicAuthToken"),
               contentData: encryptedLoginData,
               userLoginAttemptId: 1,
@@ -118,41 +127,32 @@ function App() {
               "SignIn Reqest Data========" + JSON.stringify(signInReqestData)
             );
 
-            doLogin(signInReqestData)
-            .then(response => {
-              if (!response || !response.ok) {
-                return Promise.reject(new Error('Network error')); // Reject the promise with a custom error message
-              }
-              return response.text(); // Use response.text() if the response is ok
-            })
+            getUserLoginDetails(signInReqestData)
+              .then((response) => {
+                setLoading(false)
+                if (!response || !response.ok) {
+                  return Promise.reject(new Error("Network error")); // Reject the promise with a custom error message
+                }
+                return response.text(); // Use response.text() if the response is ok
+              })
               .then((data) => {
                 // Handle successful response
                 console.log("doLogin response.data=====" + data.data);
+                setLoading(false)
               })
               .catch((error) => {
-                console.error("API Error:", error);
-                console.log("API Error:", error);
+                console.error("Login API Error:", error);
+                setLoading(false)
               });
-
-            // doLogin(signInReqestData)
-            // .then((response) => {
-            //   console.log("doLogin response.data====="+response.data)
-            //   setLoading(false); // Hide the progress dialog
-
-            // })
-            // .catch((error) => {
-            //   console.log("doLogin error.data====="+error)
-            //   setError('Error fetching users: '+error);
-            //   setLoading(true)
-            // });
           })
           .catch((error) => {
             console.error(error);
+            setLoading(false)
           });
-        // const encryptedLoginData =
       }
     } catch (error) {
       console.error("Error:", error);
+      setLoading(false)
     }
   };
 
@@ -162,7 +162,7 @@ function App() {
         <ConnectionStatus />
 
         {isNetworkConnectionAvailable ? (
-          <CustomProgressDialog open={loading} />
+          <CustomProgressDialog open={loading} text={getProgressbarText}/>
         ) : (
           showNoInternetSnackBar()
         )}
@@ -174,13 +174,12 @@ function App() {
           ))}
         </ul>
 
-        <Button variant="contained" color="primary" onClick={doLogin}>
+        <Button variant="contained" color="primary" onClick={doSignUp}>
           Click Me
         </Button>
       </SnackbarProvider>
     </Box>
   );
 }
-
 
 export default App;

@@ -6,8 +6,8 @@ const baseUrl = config.apiBaseUrl;
 const dummyApiBaseUrl = config.dummyApiBaseUrl;
 
 const instance = axios.create({
-  //baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl, // proxy server path attached in front
-  baseURL: baseUrl,
+  baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl, // proxy server path attached in front
+  //baseURL: baseUrl,
   timeout: 20000, 
   headers: {
     "Content-Type": "application/json", 
@@ -34,7 +34,7 @@ export const getBasicAuth = (includeAuthorizationHeader) => {
 };
 
 
-export const doLogin = (userData) => {
+export const getUserLoginDetails = (userData) => {
   return instance.post(process.env.REACT_APP_LOGIN_API_URL, userData);
 };
 
