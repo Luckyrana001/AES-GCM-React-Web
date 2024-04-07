@@ -2,9 +2,9 @@ import { createHash } from 'crypto';
 
 export function generateBasicAuthHeader() {
 
-    const userName = 'ymcauser';
-    const password = 'password';
-    const requestId = '88888888';
+    const userName = process.env.REACT_APP_USER_NAME;
+    const password =  process.env.REACT_APP_USER_PASSWORD;
+    const requestId =  process.env.REACT_APP_USER_REQUEST_NO;
 
 
     const hashedPassword = getHashedPassword(password,requestId)

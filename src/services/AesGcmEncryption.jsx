@@ -1,26 +1,18 @@
+import { getFromLocalStorage } from "../Utility/localStorageUtils";
 
 
-const imeiNumber = '';
-const isAutoLogin = 'N';
-const loginId = 'pdc_dealer';
-const password = 'ytlc@xm1234';
 
-const signInData = {
-    imeiNumber: imeiNumber,
-    isAutoLogin: isAutoLogin,
-    loginId:loginId,
-    password:password
-  };
-
-const keyBase64 = "70vNajEqkT4tUmXx7gNzBA==";
+//const keyBase64 = "70vNajEqkT4tUmXx7gNzBA==";
+//const keyBase64 = getFromLocalStorage("messageKey");
 const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
 
 
- export function initializeEncryption() {
+ export async function initializeEncryption(signInData,keyBase64) {
    
-    encryptData(keyBase64, JSON.stringify(signInData), rawIv)
+ return await  encryptData(keyBase64, JSON.stringify(signInData), rawIv)
       .then((encryptedData) => {
         console.log("encrypted login data-------   "+encryptedData);
+        return encryptedData
       })
       .catch((error) => {
         console.error(error);
