@@ -5,6 +5,7 @@ export const saveToLocalStorage = (key, data) => {
     try {
       //localStorage.setItem(key, JSON.stringify(data));
       localStorage.setItem(key, data);
+      console.log("saved data-====="+data)
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
@@ -12,6 +13,7 @@ export const saveToLocalStorage = (key, data) => {
   export const saveToLocalStorageJsonObject = (key, data) => {
     try {
       localStorage.setItem(key, JSON.stringify(data));
+      console.log("saved data====="+JSON.stringify(data))
      // localStorage.setItem(key, data);
     } catch (error) {
       console.error('Error saving to localStorage:', error);

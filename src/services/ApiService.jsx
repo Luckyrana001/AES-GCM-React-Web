@@ -14,6 +14,7 @@ const instance = axios.create({
   },
 });
 
+
 const instance2 = axios.create({
   baseURL: dummyApiBaseUrl,
   timeout: 60000,
@@ -27,8 +28,12 @@ export const getBasicAuth = (includeAuthorizationHeader) => {
   let headers = {};
   if (includeAuthorizationHeader) {
     const headerTokken = generateBasicAuthHeader()
-    const authToken = "BASIC " + headerTokken
+    //const authToken = "BASIC " + headerTokken
+    const authToken = "BASIC " + "eW1jYXVzZXI6MnhKeHp3RUdzaDNTNFF2RUMvZWRwZz09"
+
      headers["Authorization"] = authToken
+
+     
   }
   return instance.get(process.env.REACT_APP_BASIC_AUTH_API_URL, { headers });
 };

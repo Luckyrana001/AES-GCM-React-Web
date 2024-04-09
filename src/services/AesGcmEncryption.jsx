@@ -8,16 +8,24 @@ const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
 
 
  export async function initializeEncryption(signInData,keyBase64) {
+
+  const CryptoJS = require("crypto-js");
+
+  const encryptAES = (plaintext, keyBase64) => {
+    const encrypted = CryptoJS.AES.encrypt(plaintext, keyBase64).toString();
+    return encrypted;
+  };
    
- return await  encryptData(keyBase64, JSON.stringify(signInData), rawIv)
-      .then((encryptedData) => {
-        console.log("encrypted login data-------   "+encryptedData);
-        return encryptedData
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
+}
+//  return await  encryptData(keyBase64, JSON.stringify(signInData), rawIv)
+//       .then((encryptedData) => {
+//         console.log("encrypted login data-------   "+encryptedData);
+//         return encryptedData
+//       })
+//       .catch((error) => {
+//         console.error(error);
+//       });
+//   }
 
   
 

@@ -13,3 +13,12 @@ export const MANAGE_TEAM = 'Manage Team';
 export const CONTACT_INFORMATIONS = 'Contact Informations';
 
 export const INVOICE_BALANCE = 'Invoice Balance';
+
+// Login Box
+export const ALERT = 'Alert';
+export const ERROR = 'Error';
+export const NO_INTERNET_CONNECTION_FOUND = 'No Internet Connection Found!';
+
+
+
+

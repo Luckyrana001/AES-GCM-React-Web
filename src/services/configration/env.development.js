@@ -1,5 +1,8 @@
 const config = {
-    apiBaseUrl: 'https://partnerservicesuat.ytlcomms.my/yesshopadminweb/ws/v1/',
+    apiUatBaseUrl: 'https://partnerservicesuat.ytlcomms.my/yesshopadminweb/ws/v1/',
+
+
+    apiBaseUrl: 'https://partnerservicesiot.ytlcomms.my/yesshopadminweb/ws/v1/',
     
     // Other development-specific configuration variables
     dummyApiBaseUrl:"https://dummyjson.com"
