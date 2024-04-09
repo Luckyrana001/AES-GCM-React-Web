@@ -8,7 +8,7 @@ body,
   height: 100%;
   width: 100%;
   font-family: "Montserrat", montserrat;
-  background-image: url("/src/images/common/Logged-in-BG.jpg");
+  background-image: url("/src/images/Logged-in-BG.jpg");
   background-repeat: repeat-y;
   background-size: cover;
   background-position: center center;

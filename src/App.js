@@ -7,17 +7,19 @@ import Sidebar from "./scenes/global/Sidebar";
 import * as yup from "yup";
 
 // import Dashboard from "./scenes/dashboard";
-// import Validations from "./scenes/validations";
-// import PayoutsArchive from "./scenes/payoutsArchive";
-// import Payouts from "./scenes/payouts";
-// import OnHold from "./scenes/onhold";
-// import Invoices from "./scenes/invoices";
-// import Contacts from "./scenes/contacts";
+import Validations from "./scenes/validations";
+import PayoutsArchive from "./scenes/payoutsArchive";
+import Payouts from "./scenes/payouts";
+import OnHold from "./scenes/onhold";
+import Invoices from "./scenes/invoices";
+import Contacts from "./scenes/contacts";
+import FAQ from "./scenes/faq";
+import Form from "./scenes/form";
 // import Bar from "./scenes/bar";
-// import Form from "./scenes/form";
+// 
 // import Line from "./scenes/line";
 // import Pie from "./scenes/pie";
-// import FAQ from "./scenes/faq";
+// 
 // import Geography from "./scenes/geography";
 import { CssBaseline, ThemeProvider, colors } from "@mui/material";
 import { ColorModeContext, useMode } from "./theme";
@@ -51,20 +53,21 @@ import CustomProgressDialog from "./components/CustomProgressDialog";
             <Route path="/" element={<SignInSide />} />
             <Route path={CONSTANT.LOGIN} element={<SignInSide />} />
             <Route path={CONSTANT.FINANCE_DASHBOARD} element={<FinanceHomePage />} />
-            {/* <Route path={CONSTANT.DELAER_DASHBOARD} element={<Dashboard />} /> */}
+            {/* <Route path={CONSTANT.DELAER_DASHBOARD_ROUTE} element={<Dashboard />} /> */}
 
-              {/* <Route path="/validations" element={<Validations />} />
-              <Route path="/payoutsArchive" element={<PayoutsArchive />} />
-              <Route path="/payouts" element={<Payouts />} />
-              <Route path="/onhold" element={<OnHold />} />
-              <Route path="/contacts" element={<Contacts />} />
-              <Route path="/invoices" element={<Invoices />} />
-              <Route path="/form" element={<Form />} />
+              <Route path={CONSTANT.VALIDATION_ROUTE} element={<Validations />} />
+              <Route path={CONSTANT.PAYOUT_ARCHIEVE_ROUTE} element={<PayoutsArchive />} />
+              <Route path={CONSTANT.PAYOUT_ROUTE} element={<Payouts />} />
+              <Route path={CONSTANT.ON_HOLD_ROUTE} element={<OnHold />} />
+              <Route path={CONSTANT.CONTACT_ROUTE} element={<Contacts />} />
+              <Route path={CONSTANT.INVOICES_ROUTE} element={<Invoices />} />
+              <Route path={CONSTANT.FORMS_ROUTE} element={<Form />} />
+              {/* 
               <Route path="/bar" element={<Bar />} />
               <Route path="/pie" element={<Pie />} />
-              <Route path="/line" element={<Line />} />
+              <Route path="/line" element={<Line />} /> */}
               <Route path="/faq" element={<FAQ />} />
-              <Route path="/calendar" element={<Calendar />} />
+              {/* <Route path="/calendar" element={<Calendar />} />
               <Route path="/geography" element={<Geography />} /> */}
             </Routes>
           </main>

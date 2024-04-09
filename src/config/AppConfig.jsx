@@ -5,3 +5,4 @@ import { atomWithStorage } from 'jotai/utils'
 export const darkModeAtom = atomWithStorage('darkMode', false)
 
 export const isAuthPageAtom = atomWithStorage('isAuthPage', true)
+export const showErrorAlertDialog = atomWithStorage('getDialogStatus', false)
