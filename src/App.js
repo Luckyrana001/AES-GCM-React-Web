@@ -1,185 +1,81 @@
 import "./App.css";
+import { Box} from "@mui/material";
 import { useEffect, useState } from "react";
-import { initializeEncryption } from "./services/AesGcmEncryption";
-import {
-  getBasicAuth,
-  getUserLoginDetails,
-  getUsers,
-} from "./services/ApiService";
-import CustomProgressDialog from "./components/CustomProgressDialog";
-import { Box, Button } from "@mui/material";
-import ConnectionStatus from "./Utility/ConnectionStatus";
+import { Routes, Route } from "react-router-dom";
+import Topbar from "./scenes/global/Topbar";
+import Sidebar from "./scenes/global/Sidebar";
+import * as yup from "yup";
+
+// import Dashboard from "./scenes/dashboard";
+// import Validations from "./scenes/validations";
+// import PayoutsArchive from "./scenes/payoutsArchive";
+// import Payouts from "./scenes/payouts";
+// import OnHold from "./scenes/onhold";
+// import Invoices from "./scenes/invoices";
+// import Contacts from "./scenes/contacts";
+// import Bar from "./scenes/bar";
+// import Form from "./scenes/form";
+// import Line from "./scenes/line";
+// import Pie from "./scenes/pie";
+// import FAQ from "./scenes/faq";
+// import Geography from "./scenes/geography";
+import { CssBaseline, ThemeProvider, colors } from "@mui/material";
+import { ColorModeContext, useMode } from "./theme";
+//import Calendar from "./scenes/calendar/calendar";
+import SignInSide from "./scenes/login/SignInSide";
+import * as CONSTANT from "./constants/Constant";
+import FinanceHomePage from "./scenes/dashboard/finance/FinanceHomePage";
+
 import { SnackbarProvider, useSnackbar } from "notistack";
-import UseOnlineStatus from "./Utility/UseOnlineStatus";
-import { generateRequestId } from "./Utility/RequestIdGenerator";
-import {
-  saveToLocalStorage,
-  getFromLocalStorage,
-} from "./Utility/localStorageUtils";
+import ConnectionStatus from "./utils/ConnectionStatus";
+import UseOnlineStatus from "./utils/UseOnlineStatus";
+import CustomProgressDialog from "./components/CustomProgressDialog";
 
-function App() {
-  const isNetworkConnectionAvailable = UseOnlineStatus();
-  const { enqueueSnackbar } = useSnackbar();
+ function App() {
+  const [theme, colorMode] = useMode();
+  const [isSidebar, setIsSidebar] = useState(false);  
 
-  // api variables
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [getUser, setUsers] = useState([]);
-  const [getProgressbarText, setProgressbarText] = useState("");
 
-  useEffect(() => {
-    // initializeEncryption()
-    requestBasicAuth();
-
-    getUserInfo();
-
-    showNoInternetSnackBar();
-  }, [isNetworkConnectionAvailable, enqueueSnackbar]);
-
-  const getUserInfo = () => {
-    if (isNetworkConnectionAvailable) {
-      setProgressbarText("Loading User ...")
-      setLoading(true)
-      getUsers()
-        .then((response) => {
-          setUsers(response.data.users);
-
-          console.log("response.data=====" + response.data.users[0].firstName);
-          // console.log("getUser[0]========"+JSON.stringify(getUser));
-
-          setLoading(false); // Hide the progress dialog
-        })
-        .catch((error) => {
-          console.log("error.data=====" + error);
-          setError("Error fetching users: " + error);
-          setLoading(false)
-        });
-    }
-  };
-
-  // Generate Basic Auth hHeader()
-  const requestBasicAuth = () => {
-    if (isNetworkConnectionAvailable) {
-      getBasicAuth(true)
-        .then((response) => {
-          console.log("getBasicAuth.data=====" + JSON.stringify(response.data));
-          saveToLocalStorage("messageKey", response.data.messageKey);
-          saveToLocalStorage("basicAuthToken", response.data.basicAuthToken);
-
-        })
-        .catch((error) => {
-          console.log("error in BasicAuth=====" + error);
-          //setError('Error fetching users: '+error);
-          
-        });
-      enqueueSnackbar("You are online");
-    }
-  };
-
-  const showNoInternetSnackBar = () => {
-    if (isNetworkConnectionAvailable) {
-      enqueueSnackbar("You are online");
-    } else {
-      enqueueSnackbar("You are offline", {
-        autoHideDuration: 3000,
-        variant: "error",
-      });
-    }
-  };
-
-  const doSignUp = async () => {
-    try {
-    
-      if (isNetworkConnectionAvailable) {
-        setProgressbarText("Authenticating, Please wait...")
-         setLoading(true) // Hide the progress dialog
-
-        const imeiNumber = "23423423423";
-        const isAutoLogin = "N";
-        const loginId = "ymcauser";
-        const password = "password";
-
-        const signInData = {
-          imeiNumber: imeiNumber,
-          isAutoLogin: isAutoLogin,
-          loginId: loginId,
-          password: password,
-        };
-
-        initializeEncryption(signInData, getFromLocalStorage("messageKey"))
-          .then((encryptedLoginData) => {
-            console.log(
-              "App js encrypted Login Data=====" + encryptedLoginData
-            );
-            const signInReqestData = {
-              requestId: generateRequestId(),
-              loginId: "ymcauser",
-              sessionId: "",
-              basicAuthToken: getFromLocalStorage("basicAuthToken"),
-              contentData: encryptedLoginData,
-              userLoginAttemptId: 1,
-              password: "password",
-              imeiNumber: "23423423423",
-              isAutoLogin: "N",
-            };
-
-            console.log(
-              "SignIn Reqest Data========" + JSON.stringify(signInReqestData)
-            );
-
-            getUserLoginDetails(signInReqestData)
-              .then((response) => {
-                setLoading(false)
-                if (!response || !response.ok) {
-                  return Promise.reject(new Error("Network error")); // Reject the promise with a custom error message
-                }
-                return response.text(); // Use response.text() if the response is ok
-              })
-              .then((data) => {
-                // Handle successful response
-                console.log("doLogin response.data=====" + data.data);
-                setLoading(false)
-              })
-              .catch((error) => {
-                console.error("Login API Error:", error);
-                setLoading(false)
-              });
-          })
-          .catch((error) => {
-            console.error(error);
-            setLoading(false)
-          });
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setLoading(false)
-    }
-  };
 
   return (
-    <Box>
-      <SnackbarProvider maxSnack={3}>
-        <ConnectionStatus />
+    <ColorModeContext.Provider value={colorMode}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+       
 
-        {isNetworkConnectionAvailable ? (
-          <CustomProgressDialog open={loading} text={getProgressbarText}/>
-        ) : (
-          showNoInternetSnackBar()
-        )}
+        <div className="app">
+          <Sidebar isSidebar={isSidebar} />
+          <main className="content">
+            <Topbar setIsSidebar={setIsSidebar} />
+            <Routes>
+            <Route path="/" element={<SignInSide />} />
+            <Route path={CONSTANT.LOGIN} element={<SignInSide />} />
+            <Route path={CONSTANT.FINANCE_DASHBOARD} element={<FinanceHomePage />} />
+            {/* <Route path={CONSTANT.DELAER_DASHBOARD} element={<Dashboard />} /> */}
 
-        <h1>User List</h1>
-        <ul>
-          {getUser.map((user) => (
-            <li key={user.id}>{user.firstName}</li>
-          ))}
-        </ul>
-
-        <Button variant="contained" color="primary" onClick={doSignUp}>
-          Click Me
-        </Button>
-      </SnackbarProvider>
-    </Box>
+              {/* <Route path="/validations" element={<Validations />} />
+              <Route path="/payoutsArchive" element={<PayoutsArchive />} />
+              <Route path="/payouts" element={<Payouts />} />
+              <Route path="/onhold" element={<OnHold />} />
+              <Route path="/contacts" element={<Contacts />} />
+              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/form" element={<Form />} />
+              <Route path="/bar" element={<Bar />} />
+              <Route path="/pie" element={<Pie />} />
+              <Route path="/line" element={<Line />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/geography" element={<Geography />} /> */}
+            </Routes>
+          </main>
+        </div>
+       
+      </ThemeProvider>
+    </ColorModeContext.Provider>
   );
 }
 
+
+
 export default App;
+ 

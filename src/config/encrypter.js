@@ -1,33 +1,13 @@
-import { Buffer } from 'buffer';
 import * as React from "react";
+
+
+
+import { AES, enc } from 'crypto-js';
 import {decode as base64_decode, encode as base64_encode} from 'base-64';
-import * as crypt from "crypto";
+import { Buffer } from 'buffer';
 
 // @ts-ignore
 window.Buffer = Buffer;
-
-const ALGORITHM = 'aes-256-gcm';
-const BLOCK_SIZE_BYTES = 16; // 128 bit
-
-export const encrypt = async(text, secret) => {try {
-  
-    const crypt = require('crypto');
-  
-    const iv = crypt.randomBytes(BLOCK_SIZE_BYTES);
-    const cipher = crypt.createCipheriv(ALGORITHM, secret, iv);
-  
-    let ciphertext = cipher.update(text, 'utf8', 'base64');
-    ciphertext += cipher.final('base64');
-    return {
-      ciphertext,
-      iv: iv.toString('base64'),
-      tag: cipher.getAuthTag().toString('base64'),
-    };
-} catch (error) {
-   console.log(error)
-}
-}
-
 
 const makeKey = async (key) => {
   return await crypto.subtle.importKey(
@@ -42,12 +22,33 @@ const makeKey = async (key) => {
   );
 };
 
-export const encryptSymmetric = async (plaintext) => {
-  const key = "lQ670IgFFA4ckmz8cfZC2Q==";//crypto.getRandomValues(new Uint8Array(32));
- // const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  console.log("encrypted_data====="+JSON.stringify(iv))
 
+
+export const aesGcmCrypto = async (text) => {
+  //const crypto = require('crypto');
+  const key = crypto.getRandomValues(new Uint8Array(32)); // 256-bit key
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
+
+  const plaintext = "Your payload to encrypt";
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+
+  let encrypted = cipher.update(plaintext, "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  const tag = cipher.getAuthTag();
+  const output = Buffer.from(
+    iv.toString("hex") + encrypted + tag.toString("hex"),
+    "hex"
+  ).toString("base64");
+
+  console.log("output string=======" + output)
+}
+
+export const encryptSymmetric = async (plaintext) => {
+  const key = '1QyFdOlxCnxx3LjENx3+8Q==';
+
+  const iv =  crypto.randomBytes(12)
+  //const iv = crypto.getRandomValues(new Uint8Array(12));
   const encodedPlaintext = new TextEncoder().encode(plaintext);
   const secretKey = await makeKey(key);
 
@@ -66,10 +67,11 @@ export const encryptSymmetric = async (plaintext) => {
   };
 };
 
-export const decryptSymmetric = async (ciphertext, iv) => {
-  const key = crypto.getRandomValues(new Uint8Array(32));
 
-  //const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+
+export const decryptSymmetric = async (ciphertext, iv) => {
+ //const key = process.env.NEXT_PUBLIC_ENCRYPTION_KEY;
+  const key = "oU+q4YdtdOYXJ5bQfenRTw=="
   const secretKey = await makeKey(key);
 
   const cleartext = await crypto.subtle.decrypt(
@@ -86,15 +88,15 @@ export const decryptSymmetric = async (ciphertext, iv) => {
 
 export const saveToLocalStorage = async (name, data) => {
   const stringified_data = JSON.stringify(data);
-  console.log("stringified_data====="+stringified_data)
   const encrypted_data = await encryptSymmetric(stringified_data);
-  console.log("encrypted_data====="+JSON.stringify(encrypted_data))
+  console.log("encrypted_data string=======" + JSON.stringify(encrypted_data));
   localStorage.setItem(name, JSON.stringify(encrypted_data));
+
+  
 };
 
 export const getFromLocalStorage = async (name) => {
   const raw_data = localStorage.getItem(name);
-  console.log("raw_data====="+JSON.stringify(raw_data))
   if (!raw_data) return null;
 
   const encrypted_data = JSON.parse(raw_data);
@@ -103,7 +105,6 @@ export const getFromLocalStorage = async (name) => {
     encrypted_data.iv
   );
   const un_stringified_data = JSON.parse(decrypted_data);
-  console.log("decrypted_data====="+un_stringified_data)
   return un_stringified_data;
 };
 

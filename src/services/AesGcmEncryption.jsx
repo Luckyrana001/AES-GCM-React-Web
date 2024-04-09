@@ -1,4 +1,4 @@
-import { getFromLocalStorage } from "../Utility/localStorageUtils";
+import { getFromLocalStorage } from "../utils/localStorageUtils";
 
 
 
