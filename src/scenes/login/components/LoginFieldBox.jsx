@@ -20,17 +20,16 @@ import {
 import ConnectionStatus from "../../../utils/ConnectionStatus";
 import { SnackbarProvider, useSnackbar } from "notistack";
 import UseOnlineStatus from "../../../utils/UseOnlineStatus";
-import { generateRequestId } from "../../../utils/RequestIdGenerator";
 import {
   saveToLocalStorage,
   getFromLocalStorage,
 } from "../../../utils/localStorageUtils";
 import CustomProgressDialog from "../../../components/CustomProgressDialog";
 import ShowErrorAlertDialog from "../../../components/ErrorAlertDialog";
-import { ALERT, ERROR, NO_INTERNET_CONNECTION_FOUND } from "../../../constants/Strings";
+import { ALERT, AUTHENTICATING_PLEASE_WAIT, DONT_HAVE_A_ACCOUNT_SIGNUP, ERROR, ERROR_WHILE_AUTHENTICATING_USER, ERROR_WHILE_RETRIEVING_BASIC_AUTH, FORGOT_PASSWORD, NO_INTERNET_CONNECTION_FOUND, REMEMBER_ME, YOU_ARE_OFFLINE, YOU_ARE_ONLINE } from "../../../constants/Strings";
 import DebugLog from "../../../utils/DebugLog";
+import { BASIC_AUTH_TOKKEN, MESSAGE_KEY, SESSION_ID } from "../../../constants/LocalStorageKeyValuePairString";
 
-// Define a functional component named MyComponent
 function LoginFieldBox() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -45,18 +44,18 @@ function LoginFieldBox() {
 
   // api variables
   const [loading, setLoading] = useState(false);
- // const [getDialogStatus, setErrorDialogOpen] = useState(false);
-  const [title, setTitle] = useState("Alert");
+  const [title, setTitle] = useState(ALERT);
   const [content, setContent] = useState("This is error message!");
   const [error, setError] = useState("");
   const [getUser, setUsers] = useState([]);
   const [getProgressbarText, setProgressbarText] = useState("");
 
   useEffect(() => {
-    // initializeEncryption()
+
+    if(getFromLocalStorage(BASIC_AUTH_TOKKEN))
     requestBasicAuth();
 
-    getUserInfo();
+   // getUserInfo();
 
     showNoInternetSnackBar();
   }, [isNetworkConnectionAvailable, enqueueSnackbar]);
@@ -70,11 +69,11 @@ function LoginFieldBox() {
         .then((response) => {
           DebugLog("getBasicAuth.data=====" + JSON.stringify(response.data))
          // DebugLog("getBasicAuth.data=====" + JSON.stringify(response.data));
-          saveToLocalStorage("messageKey", response.data.messageKey);
-          saveToLocalStorage("basicAuthToken", response.data.basicAuthToken);
+          saveToLocalStorage(MESSAGE_KEY, response.data.messageKey);
+          saveToLocalStorage(BASIC_AUTH_TOKKEN, response.data.basicAuthToken);
         })
         .catch((error) => {
-          showErrorAlert(ERROR,"Error while retrieving basic auth: " + error)
+          showErrorAlert(ERROR,ERROR_WHILE_RETRIEVING_BASIC_AUTH+ error)
         });
     } else {
       showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
@@ -83,9 +82,9 @@ function LoginFieldBox() {
 
   const showNoInternetSnackBar = () => {
     if (isNetworkConnectionAvailable) {
-      enqueueSnackbar("You are online");
+      enqueueSnackbar(YOU_ARE_ONLINE);
     } else {
-      enqueueSnackbar("You are offline", {
+      enqueueSnackbar(YOU_ARE_OFFLINE, {
         autoHideDuration: 3000,
         variant: "error",
       });
@@ -95,7 +94,7 @@ function LoginFieldBox() {
   async function doSignUp(email , pswd) {
     try {
       if (isNetworkConnectionAvailable) {
-        setProgressbarText("Authenticating, Please wait...");
+        setProgressbarText(AUTHENTICATING_PLEASE_WAIT);
         setLoading(true); // Hide the progress dialog
 
         const imeiNumber = "23423423423";
@@ -113,7 +112,7 @@ function LoginFieldBox() {
         //DebugLog("signInData===="+JSON.stringify(signInData))
         DebugLog("signInData===="+JSON.stringify(signInData))
 
-        initializeEncryption(signInData, getFromLocalStorage("messageKey"))
+        initializeEncryption(signInData, getFromLocalStorage(MESSAGE_KEY))
           .then((encryptedLoginData) => {
             DebugLog(
               "App js encrypted Login Data=====" + encryptedLoginData
@@ -122,7 +121,7 @@ function LoginFieldBox() {
               //requestId: generateRequestId(),
               loginId: signInData.loginId,
               //sessionId: "",
-              basicAuthToken: getFromLocalStorage("basicAuthToken"),
+              basicAuthToken: getFromLocalStorage(BASIC_AUTH_TOKKEN),
               contentData: encryptedLoginData,
               //userLoginAttemptId: 1,
               //password: signInData.password,
@@ -145,8 +144,8 @@ function LoginFieldBox() {
               .then((response) => {
                 // Handle successful response
                 DebugLog("doLogin response.data=====" + JSON.stringify(response.data));
-                saveToLocalStorage("sessionId",response.data.sessionId)
-                const sessionID = getFromLocalStorage("sessionId")
+                saveToLocalStorage(SESSION_ID,response.data.sessionId)
+                const sessionID = getFromLocalStorage(SESSION_ID)
                 DebugLog("sessionID=====" + sessionID);
                 setLoading(false);
                 //goToDashboard()
@@ -154,19 +153,19 @@ function LoginFieldBox() {
               .catch((error) => {
                 //if(error.response!=null)
                 const message = error.response!=null ? error.response : error.message;
-                showErrorAlert(error.message,"Error while authenticating user: " + JSON.stringify(message))
+                showErrorAlert(error.message,ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message))
               });
           })
           .catch((error) => {
             const message = error.response!=null ? error.response : error.message;
-                showErrorAlert(error.message,"Error while authenticating user: " + JSON.stringify(message))
+                showErrorAlert(error.message,ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message))
           });
       } else {
         showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
       }
     } catch (error) {
       const message = error.response!=null ? error.response : error.message;
-      showErrorAlert(error.message,"Error while authenticating user: " + JSON.stringify(message))
+      showErrorAlert(error.message, ERROR_WHILE_AUTHENTICATING_USER+ JSON.stringify(message))
     }
   };
   const getUserInfo = () => {
@@ -213,7 +212,7 @@ function LoginFieldBox() {
       setContent(content)
       setErrorDialog(true)
     }catch(error){
-      console.log(error)
+      DebugLog(error)
     }
    
   }
@@ -288,7 +287,7 @@ function LoginFieldBox() {
 
                   <FormControlLabel
                     control={<CheckBox value="remember" color="primary" />}
-                    label="Remember me"
+                    label={REMEMBER_ME}
                   />
 
                   <Button
@@ -304,12 +303,12 @@ function LoginFieldBox() {
                   <Grid container>
                     <Grid item xs>
                       <Link href="#" variant="body2">
-                        Forgot password?
+                        {FORGOT_PASSWORD}
                       </Link>
                     </Grid>
                     <Grid item>
                       <Link href="#" variant="body2">
-                        {"Don't have an account? Sign Up"}
+                        {DONT_HAVE_A_ACCOUNT_SIGNUP}
                       </Link>
                     </Grid>
                   </Grid>

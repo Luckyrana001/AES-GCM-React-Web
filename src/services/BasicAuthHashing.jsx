@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import DebugLog from '../utils/DebugLog';
 
 export function generateBasicAuthHeader() {
 
@@ -11,7 +12,7 @@ export function generateBasicAuthHeader() {
     const newString = userName+':'+hashedPassword;
     const encodedString = btoa(newString);
     const  finalString = encodedString.replace(/\n/g, ''); // Remove newline characters
-     console.log("Encoded string:", finalString);
+    DebugLog("Encoded string:", finalString);
 
      return finalString;
 
@@ -26,9 +27,9 @@ export function generateBasicAuthHeader() {
       const hashResult = md5Hash.digest();
       const base64Encoded = Buffer.from(hashResult).toString('base64');
       generatedPassword = base64Encoded.replace(/\n/g, ''); // Remove newline characters
-      console.log("generatedPassword==========="+generatedPassword)
+      DebugLog("generatedPassword==========="+generatedPassword)
     } catch (error) {
-      console.error('Hashing error:', error);
+      DebugLog('Hashing error:', error);
     }
     return generatedPassword;
   }

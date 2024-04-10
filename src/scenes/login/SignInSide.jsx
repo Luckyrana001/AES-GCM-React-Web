@@ -1,32 +1,15 @@
 import * as React from "react";
 import { tokens } from "../../theme";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
-import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import { useNavigate } from "react-router-dom";
-
-import { isAuthPageAtom } from "../../config/AppConfig";
-import { atom, useAtom } from "jotai";
-import * as CONSTANT from "../../constants/Constant";
-import { Button, Typography, useTheme } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import LoginFieldBox from "./components/LoginFieldBox";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 export default function SignInSide() {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
-  const [isAuthPage, setAuthStatus] = useAtom(isAuthPageAtom);
-  
   
 
   return (
