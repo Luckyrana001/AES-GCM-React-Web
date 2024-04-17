@@ -8,8 +8,9 @@ import { tokens } from "../theme";
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
-import { FINANCE_DASHBOARD, VALIDATIONS } from '../../src/constants/Constant';
 import { Link } from "react-router-dom";
+import DebugLog from '../utils/DebugLog';
+import NoDataFound from './NoDataFound';
 
 function createData(cycle, status, cutoff, payout, details) {
     return { cycle, status, cutoff, payout, details};
@@ -41,17 +42,46 @@ function createData(cycle, status, cutoff, payout, details) {
   ];
 
 
+
 const SimpleTable = ({
     statusBG,
     statusData,
+    data,
     to,
   }) => {
+
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
 
     const [selectedRow, setSelectedRow] = React.useState({});
-    console.log({ selectedRow });
+    DebugLog({ selectedRow });
+    DebugLog("data===="+data);
+    
 
+    if (!data || data.length === 0) {
+      return (
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12} borderRadius= {2} >
+        <TableContainer sx={{ borderRadius: "0 0 8px 8px"}}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableHead sx={{ background: "rgba(255,255,255,0.6)", color:"#FF2300 !important", textTransform: "uppercase" }}>
+                    <TableRow sx={{letterSpacing: "1px"  }}>
+                      <TableCell sx={{ paddingLeft: "28px" }} >Cycle</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Cut Off</TableCell>
+                      <TableCell>Pay Out By</TableCell>
+                      <TableCell align="right" sx={{ paddingRight: "28px" }}>Details</TableCell>
+                    </TableRow>
+                  </TableHead>
+     
+       </Table>
+          </TableContainer>
+
+          <NoDataFound/>
+       </Grid>
+       
+      );
+    }
+  
 
     return (
 
@@ -69,14 +99,15 @@ const SimpleTable = ({
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ background: "rgba(255,255,255,1)"}}>
-                    {rows.map((row) => (
+                    {data.map(payoutSummaryList => (
                       <TableRow
-                        key={row.name}
+                        key={payoutSummaryList.id}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 }, textDecoration: 'none !important' }}
                         component={Link} to="/payouts"
                       >
                         <TableCell component="th" scope="row" sx={{ paddingLeft: "28px", fontSize:14, fontWeight: 600 }}>
-                          {row.cycle}
+                          {payoutSummaryList.cycle}
+                         
                         </TableCell>
                         <TableCell 
                             sx={{ color:statusBG, fontWeight: 700, fontSize:13 }}
@@ -88,14 +119,16 @@ const SimpleTable = ({
                                     ></Box>
                                 </Grid>
                                 <Grid item>
-                                  {statusData}
+                                {payoutSummaryList.status}
                                 </Grid>
                             </Grid>
                             
                         </TableCell>
-                        <TableCell>{row.cutoff}</TableCell>
-                        <TableCell>{row.payout}</TableCell>
-                        <TableCell align="right" sx={{ paddingRight: "28px", fontSize:15, fontWeight: 900 }}>{row.details}</TableCell>
+                        <TableCell>{payoutSummaryList.cutOff}</TableCell>
+                        <TableCell>{payoutSummaryList.payoutBy}</TableCell>
+                        <TableCell align="right" sx={{ paddingRight: "28px", fontSize:15, fontWeight: 900 }}>{payoutSummaryList.details}</TableCell>
+             
+              
                       </TableRow>
                     ))}
                   </TableBody>

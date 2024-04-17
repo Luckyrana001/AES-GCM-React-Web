@@ -10,9 +10,11 @@ import * as yup from "yup";
 import Validations from "./scenes/validations";
 import PayoutsArchive from "./scenes/payoutsArchive";
 import Payouts from "./scenes/payouts";
-import OnHold from "./scenes/onhold";
 import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
+import DataGridDemo from "./scenes/contacts/DataGridDemo";
+
+
 import FAQ from "./scenes/faq";
 import Form from "./scenes/form";
 // import Bar from "./scenes/bar";
@@ -32,11 +34,21 @@ import { SnackbarProvider, useSnackbar } from "notistack";
 import ConnectionStatus from "./utils/ConnectionStatus";
 import UseOnlineStatus from "./utils/UseOnlineStatus";
 import CustomProgressDialog from "./components/CustomProgressDialog";
+import { OnHoldSummary } from "./scenes/onhold";
+import ExclusionScreen from "./scenes/exclusion";
+import { WitholdingTaxScreen } from "./scenes/witholdingTax";
+import { FreezeAccountScreen } from "./scenes/freezeAccount";
+import { CreditDebitScreen } from "./scenes/creditDebit";
+import PayoutDatesScreen from "./scenes/payoutDates";
+import { EarmarkScreen } from "./scenes/earmark";
 
  function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(false);  
-
+// Prevent clicks on the progress indicator itself from affecting the loading state
+const handleProgressClick = (event) => {
+  event.stopPropagation();
+};
 
 
   return (
@@ -45,7 +57,7 @@ import CustomProgressDialog from "./components/CustomProgressDialog";
         <CssBaseline />
        
 
-        <div className="app">
+        <div className="app"  onClick={handleProgressClick}>
           <Sidebar isSidebar={isSidebar} />
           <main className="content">
             <Topbar setIsSidebar={setIsSidebar} />
@@ -58,10 +70,23 @@ import CustomProgressDialog from "./components/CustomProgressDialog";
               <Route path={CONSTANT.VALIDATION_ROUTE} element={<Validations />} />
               <Route path={CONSTANT.PAYOUT_ARCHIEVE_ROUTE} element={<PayoutsArchive />} />
               <Route path={CONSTANT.PAYOUT_ROUTE} element={<Payouts />} />
-              <Route path={CONSTANT.ON_HOLD_ROUTE} element={<OnHold />} />
+              <Route path={CONSTANT.ON_HOLD_ROUTE} element={<OnHoldSummary />} />
               <Route path={CONSTANT.CONTACT_ROUTE} element={<Contacts />} />
               <Route path={CONSTANT.INVOICES_ROUTE} element={<Invoices />} />
+              <Route path={CONSTANT.EXCLUSION_ROUTE} element={<ExclusionScreen />} />
+              <Route path={CONSTANT.PAYOUT_DATES_ROUTE} element={<PayoutDatesScreen />} />
+              <Route path={CONSTANT.WITHOLDING_TAX_ROUTE} element={<WitholdingTaxScreen />} />
+              <Route path={CONSTANT.FREEZE_ACCOUNT_ROUTE} element={<FreezeAccountScreen />} />
+              <Route path={CONSTANT.CREDIT_DEBIT_ROUTE} element={<CreditDebitScreen />} />
+              <Route path={CONSTANT.REPORTS_ROUTE} element={<FAQ />} />
+              <Route path={CONSTANT.EARMARK_ROUTE} element={<EarmarkScreen />} />
+
+              
+
+              
               <Route path={CONSTANT.FORMS_ROUTE} element={<Form />} />
+              <Route path="/team" element={<DataGridDemo />} />
+              
               {/* 
               <Route path="/bar" element={<Bar />} />
               <Route path="/pie" element={<Pie />} />

@@ -1,52 +1,49 @@
-import axios from "axios";
 import { generateBasicAuthHeader } from "./BasicAuthHashing";
-import config from "./configration/config";
-
-const baseUrl = config.apiBaseUrl;
-const dummyApiBaseUrl = config.dummyApiBaseUrl;
-
-const instance = axios.create({
-  baseURL: 'https://cors-anywhere.herokuapp.com/'+baseUrl, // proxy server path attached in front
-  //baseURL: baseUrl,
-  timeout: 20000, 
-  headers: {
-    "Content-Type": "application/json", 
-  },
-});
+import {  AUTHORIZATION } from "../constants/Constant";
+import DebugLog from "../utils/DebugLog";
+import { axiosInstance } from "./AxiosIntercepter";
 
 
-const instance2 = axios.create({
-  baseURL: dummyApiBaseUrl,
-  timeout: 60000,
-  headers: {
-    "Content-Type": "application/json", 
-  },
-});
-
-
+// get Basic auth
 export const getBasicAuth = (includeAuthorizationHeader) => {
   let headers = {};
   if (includeAuthorizationHeader) {
-    const headerTokken = generateBasicAuthHeader()
-    //const authToken = "BASIC " + headerTokken
-    const authToken = "BASIC " + "eW1jYXVzZXI6MnhKeHp3RUdzaDNTNFF2RUMvZWRwZz09"
-
-     headers["Authorization"] = authToken
-
-     
+    const headerTokken = generateBasicAuthHeader();
+    const authToken = "BASIC " + headerTokken;
+    //const authToken = "BASIC " + "eW1jYXVzZXI6MnhKeHp3RUdzaDNTNFF2RUMvZWRwZz09"
+    DebugLog("authToken====" + authToken);
+    headers[AUTHORIZATION] = authToken;
   }
-  return instance.get(process.env.REACT_APP_BASIC_AUTH_API_URL, { headers });
+  return axiosInstance.get(process.env.REACT_APP_BASIC_AUTH_API_URL, { headers });
 };
 
-
-export const getUserLoginDetails = (userData) => {
-  return instance.post(process.env.REACT_APP_LOGIN_API_URL, userData);
+// get user login details
+export const getUserLoginDetails = (reqestParams) => {
+  return axiosInstance.post(process.env.REACT_APP_LOGIN_API_URL, reqestParams);
 };
 
-export const getUsers = () => {
-  return instance2.get(process.env.REACT_APP_USER_API_URL);
+// create dummy user
+export const createUser = (reqestParams) => {
+  return axiosInstance.post("/users", reqestParams);
 };
 
-export const createUser = (userData) => {
-  return instance.post("/users", userData);
+// get payout details
+export const getPayoutDetails = (reqestParams) => {
+  return axiosInstance.post(process.env.REACT_APP_PAYOUT_DETAILS_API_URL, reqestParams);
 };
+
+// get payout summary 
+export const getPayoutSummary = (reqestParams) => {
+  return axiosInstance.post(process.env.REACT_APP_PAYOUT_SUMMARY_API_URL, reqestParams);
+};
+
+// get on-hold summary 
+export const getOnHoldDetails = (reqestParams) => {
+  return axiosInstance.post(process.env.REACT_APP_ON_HOLD_DETAILS_API_URL, reqestParams);
+};
+
+// get on-hold details 
+export const getOnHoldSummary = (reqestParams) => {
+  return axiosInstance.post(process.env.REACT_APP_ON_HOLD_SUMMARY_API_URL, reqestParams);
+};
+

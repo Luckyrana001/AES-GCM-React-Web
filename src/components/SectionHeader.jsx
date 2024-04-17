@@ -13,12 +13,11 @@ const SectionHeader = ({
   return (
     <Grid
           item
-          xs={12} sm={12} md={12} lg={12} xl={12}
+          xs={12} sm={12} md={12} lg={12} xl={12} pb={10}
           backgroundColor={"rgba(255,255,255,0.6)"}
           opacity={5}
           borderRadius= {2}
           p={3}
-          pb={1}
           alignItems={"center"}
         >
           <Grid container direction={"row"} alignItems={"center"} spacing={3}>

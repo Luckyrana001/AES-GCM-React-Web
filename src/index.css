@@ -8,7 +8,7 @@ body,
   height: 100%;
   width: 100%;
   font-family: "Montserrat", montserrat;
-  background-image: url("/src/images/Logged-in-BG.jpg");
+  background-image: url("/src/assets/login/Logged-in-BG.jpg");
   background-repeat: repeat-y;
   background-size: cover;
   background-position: center center;
@@ -38,4 +38,10 @@ body,
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.bold-column--cell {
+  color: black; 
+  font-weight: bold;
+  font-size: small;
 }

@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { atom, useAtom } from "jotai";
 import * as React from "react";
-import { isAuthPageAtom, showErrorAlertDialog } from "../../../config/AppConfig";
-import { useTheme } from "@emotion/react";
-import { tokens } from "../../../theme";
+import {
+  isAuthPageAtom,
+  showErrorAlertDialog,
+} from "../../../config/AppConfig";
 import * as CONSTANT from "../../../constants/Constant";
 import { Formik } from "formik";
 import * as yup from "yup";
@@ -14,8 +15,8 @@ import { CheckBox } from "@mui/icons-material";
 import { initializeEncryption } from "../../../services/AesGcmEncryption";
 import {
   getBasicAuth,
+  getPayoutDetails,
   getUserLoginDetails,
-  getUsers,
 } from "../../../services/ApiService";
 import ConnectionStatus from "../../../utils/ConnectionStatus";
 import { SnackbarProvider, useSnackbar } from "notistack";
@@ -23,60 +24,92 @@ import UseOnlineStatus from "../../../utils/UseOnlineStatus";
 import {
   saveToLocalStorage,
   getFromLocalStorage,
+  deleteAllKeyFromLocalStorage,
 } from "../../../utils/localStorageUtils";
 import CustomProgressDialog from "../../../components/CustomProgressDialog";
 import ShowErrorAlertDialog from "../../../components/ErrorAlertDialog";
-import { ALERT, AUTHENTICATING_PLEASE_WAIT, DONT_HAVE_A_ACCOUNT_SIGNUP, ERROR, ERROR_WHILE_AUTHENTICATING_USER, ERROR_WHILE_RETRIEVING_BASIC_AUTH, FORGOT_PASSWORD, NO_INTERNET_CONNECTION_FOUND, REMEMBER_ME, YOU_ARE_OFFLINE, YOU_ARE_ONLINE } from "../../../constants/Strings";
+import {
+  ALERT,
+  AUTHENTICATING_PLEASE_WAIT,
+  DONT_HAVE_A_ACCOUNT_SIGNUP,
+  ERROR,
+  ERROR_WHILE_AUTHENTICATING_USER,
+  ERROR_WHILE_FETCHING_PAYOUT_DETAILS,
+  ERROR_WHILE_RETRIEVING_BASIC_AUTH,
+  FETCHING_PAYOUT_DETAILS_PLEASE_WAIT,
+  FORGOT_PASSWORD,
+  LOADING_CONFIGRATION_PLEASE_WAIT,
+  NO_INTERNET_CONNECTION_FOUND,
+  REMEMBER_ME,
+  YOU_ARE_OFFLINE,
+  YOU_ARE_ONLINE,
+} from "../../../constants/Strings";
 import DebugLog from "../../../utils/DebugLog";
-import { BASIC_AUTH_TOKKEN, MESSAGE_KEY, SESSION_ID } from "../../../constants/LocalStorageKeyValuePairString";
+import {
+  BASIC_AUTH_TOKKEN,
+  LOGIN_ID,
+  MESSAGE_KEY,
+  SESSION_ID,
+  USER_ID,
+} from "../../../constants/LocalStorageKeyValuePairString";
+import { generateRequestId } from "../../../utils/RequestIdGenerator";
+import { ApiType } from "../../../services/ApiTags";
 
 function LoginFieldBox() {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
-  const [isAuthPage, setAuthStatus] = useAtom(isAuthPageAtom);
+  const [, setAuthStatus] = useAtom(isAuthPageAtom);
   const [getDialogStatus, setErrorDialog] = useAtom(showErrorAlertDialog);
-
-  
-
   const isNetworkConnectionAvailable = UseOnlineStatus();
   const { enqueueSnackbar } = useSnackbar();
-
-  // api variables
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState(ALERT);
-  const [content, setContent] = useState("This is error message!");
-  const [error, setError] = useState("");
-  const [getUser, setUsers] = useState([]);
+  const [content, setContent] = useState("");
+  const [, setError] = useState("");
   const [getProgressbarText, setProgressbarText] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
+    resetAllConfigration();
 
-    if(getFromLocalStorage(BASIC_AUTH_TOKKEN))
-    requestBasicAuth();
-
-   // getUserInfo();
+    const basicAuthTokken = getFromLocalStorage(BASIC_AUTH_TOKKEN);
+    if (basicAuthTokken === undefined || basicAuthTokken === null)
+      requestBasicAuth(false);
 
     showNoInternetSnackBar();
   }, [isNetworkConnectionAvailable, enqueueSnackbar]);
 
   
 
+  const resetAllConfigration = () => {
+    setAuthStatus(true);
+    setError("");
+    setErrorDialog(false);
+    deleteAllKeyFromLocalStorage();
+  };
+
   // Generate Basic Auth hHeader()
-  const requestBasicAuth = () => {
+  const requestBasicAuth = (isLoginApiCallRequired) => {
     if (isNetworkConnectionAvailable) {
+      setProgressbarText(LOADING_CONFIGRATION_PLEASE_WAIT);
+      setLoading(true);
       getBasicAuth(true)
         .then((response) => {
-          DebugLog("getBasicAuth.data=====" + JSON.stringify(response.data))
-         // DebugLog("getBasicAuth.data=====" + JSON.stringify(response.data));
+          DebugLog("getBasicAuth.data=====" + JSON.stringify(response.data));
           saveToLocalStorage(MESSAGE_KEY, response.data.messageKey);
           saveToLocalStorage(BASIC_AUTH_TOKKEN, response.data.basicAuthToken);
+
+          if (isLoginApiCallRequired) {
+            doSignUp(email, password);
+          } else {
+            setLoading(false);
+          }
         })
         .catch((error) => {
-          showErrorAlert(ERROR,ERROR_WHILE_RETRIEVING_BASIC_AUTH+ error)
+          showErrorAlert(ERROR, ERROR_WHILE_RETRIEVING_BASIC_AUTH + error);
         });
     } else {
-      showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
+      showErrorAlert(ALERT, NO_INTERNET_CONNECTION_FOUND);
     }
   };
 
@@ -91,144 +124,158 @@ function LoginFieldBox() {
     }
   };
 
-  async function doSignUp(email , pswd) {
+  async function doSignUp(email, pswd) {
     try {
       if (isNetworkConnectionAvailable) {
-        setProgressbarText(AUTHENTICATING_PLEASE_WAIT);
-        setLoading(true); // Hide the progress dialog
+        if (getFromLocalStorage(BASIC_AUTH_TOKKEN) != null) {
+          setProgressbarText(AUTHENTICATING_PLEASE_WAIT);
+          setLoading(true); // Hide the progress dialog
 
-        const imeiNumber = "23423423423";
-        const isAutoLogin = "N";
-        const loginId = email;
-        const password = pswd;
+          const imeiNumber = "23423423423";
+          const isAutoLogin = "N";
+          const loginId = email;
+          const password = pswd;
 
-        const signInData = {
-          imeiNumber: imeiNumber,
-          isAutoLogin: isAutoLogin,
-          loginId: loginId,
-          password: password,
-        };
+          const signInData = {
+            imeiNumber: imeiNumber,
+            isAutoLogin: isAutoLogin,
+            loginId: loginId,
+            password: password,
+          };
 
-        //DebugLog("signInData===="+JSON.stringify(signInData))
-        DebugLog("signInData===="+JSON.stringify(signInData))
+          initializeEncryption(
+            signInData,
+            getFromLocalStorage(MESSAGE_KEY),
+            ApiType.SIGN_IN
+          )
+            .then((encryptedLoginData) => {
+              DebugLog("Content data Login Data=====" + encryptedLoginData);
+              saveToLocalStorage(LOGIN_ID, signInData.loginId);
+              const signInReqestData = {
+                //requestId: generateRequestId(),
+                loginId: signInData.loginId,
+                basicAuthToken: getFromLocalStorage(BASIC_AUTH_TOKKEN),
+               // contentData: encryptedLoginData,
+              };
 
-        initializeEncryption(signInData, getFromLocalStorage(MESSAGE_KEY))
-          .then((encryptedLoginData) => {
-            DebugLog(
-              "App js encrypted Login Data=====" + encryptedLoginData
-            );
-            const signInReqestData = {
-              //requestId: generateRequestId(),
-              loginId: signInData.loginId,
-              //sessionId: "",
-              basicAuthToken: getFromLocalStorage(BASIC_AUTH_TOKKEN),
-              contentData: encryptedLoginData,
-              //userLoginAttemptId: 1,
-              //password: signInData.password,
-             // imeiNumber: "23423423423",
-             // isAutoLogin: "N",
-            };
+             
+              getUserLoginDetails(signInReqestData)
+                .then((response) => {
 
-            DebugLog(
-              "SignIn Reqest Data========" + JSON.stringify(signInReqestData)
-            );
+                  DebugLog("response.data====="+response.data)
+                  DebugLog("response.data.result====="+response.data.result)
+                  DebugLog("response.data.result.sessionId===="+response.data.result.sessionId)
+                  const sessionId = response.data.result.sessionId;
+                  DebugLog("sessionId====="+sessionId)
 
-            getUserLoginDetails(signInReqestData)
-              // .then((response) => {
-              //   setLoading(false);
-              //   if (!response || !response.statusText=="OK") {
-              //     return Promise.reject(new Error("Network error")); // Reject the promise with a custom error message
-              //   }
-              //   return response.text(); // Use response.text() if the response is ok
-              // })
-              .then((response) => {
-                // Handle successful response
-                DebugLog("doLogin response.data=====" + JSON.stringify(response.data));
-                saveToLocalStorage(SESSION_ID,response.data.sessionId)
-                const sessionID = getFromLocalStorage(SESSION_ID)
-                DebugLog("sessionID=====" + sessionID);
-                setLoading(false);
-                //goToDashboard()
-              })
-              .catch((error) => {
-                //if(error.response!=null)
-                const message = error.response!=null ? error.response : error.message;
-                showErrorAlert(error.message,ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message))
-              });
-          })
-          .catch((error) => {
-            const message = error.response!=null ? error.response : error.message;
-                showErrorAlert(error.message,ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message))
-          });
+                  saveToLocalStorage(SESSION_ID, sessionId);
+                  //saveToLocalStorage(USER_ID, response.data.result.userId);
+
+                  // open dashbaord on the basis of response type and login path
+                   goToDashboard();
+
+                  setLoading(false);
+
+                 
+                })
+                .catch((error) => {
+                  //if(error.response!=null)
+                  const message =
+                    error.response != null ? error.response : error.message;
+                  showErrorAlert(
+                    error.message,
+                    ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message)
+                  );
+                });
+            })
+            .catch((error) => {
+              const message =
+                error.response != null ? error.response : error.message;
+              showErrorAlert(
+                error.message,
+                ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message)
+              );
+            });
+        } else {
+          requestBasicAuth(true);
+        }
       } else {
-        showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
+        showErrorAlert(ALERT, NO_INTERNET_CONNECTION_FOUND);
       }
     } catch (error) {
-      const message = error.response!=null ? error.response : error.message;
-      showErrorAlert(error.message, ERROR_WHILE_AUTHENTICATING_USER+ JSON.stringify(message))
+      const message = error.response != null ? error.response : error.message;
+      showErrorAlert(
+        error.message,
+        ERROR_WHILE_AUTHENTICATING_USER + JSON.stringify(message)
+      );
     }
-  };
-  const getUserInfo = () => {
-    if (isNetworkConnectionAvailable) {
-      setProgressbarText("Loading User Info...");
-      setLoading(true);
-      getUsers()
-        .then((response) => {
-          setUsers(response.data.users);
+  }
+  // const getUserInfo = () => {
+  //   if (isNetworkConnectionAvailable) {
+  //     setProgressbarText("Loading User Info...");
+  //     setLoading(true);
+  //     getUsers()
+  //       .then((response) => {
+  //         setUsers(response.data.users);
 
-          DebugLog("response.data=====" + response.data.users[0].firstName);
-          // DebugLog("getUser[0]========"+JSON.stringify(getUser));
+  //         DebugLog("response.data=====" + response.data.users[0].firstName);
+  //         // DebugLog("getUser[0]========"+JSON.stringify(getUser));
 
-          setLoading(false); // Hide the progress dialog
-        })
-        .catch((error) => {
-          showErrorAlert(ERROR,"Error in fetching Users: " + error)
-        });
-    } else {
-      showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
-    }
-  };
+  //         setLoading(false); // Hide the progress dialog
+  //       })
+  //       .catch((error) => {
+  //         showErrorAlert(ERROR,"Error in fetching Users: " + error)
+  //       });
+  //   } else {
+  //     showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
+  //   }
+  // };
   const handleFormSubmit = (values) => {
     if (isNetworkConnectionAvailable) {
-      //values.preventDefault();
-      DebugLog(values);
-      DebugLog(values.emailValue)
+      setEmail(values.emailValue);
+      setPassword(values.passwordValue);
 
-      doSignUp(values.emailValue,values.passwordValue)
-     // goToDashboard();
+      if (getFromLocalStorage(BASIC_AUTH_TOKKEN) != null)
+        //values.preventDefault();
+        DebugLog(values);
+      DebugLog(values.emailValue);
+
+      doSignUp(values.emailValue, values.passwordValue);
+      // goToDashboard();
     } else {
-      showErrorAlert(ALERT,NO_INTERNET_CONNECTION_FOUND)
+      showErrorAlert(ALERT, NO_INTERNET_CONNECTION_FOUND);
     }
   };
 
-  
-  function showErrorAlert(title , content) {
-    try{
+  function showErrorAlert(title, content) {
+    try {
       DebugLog("error.data=====" + content);
       setError();
       setLoading(false);
-  
-      setTitle(title)
-      setContent(content)
-      setErrorDialog(true)
-    }catch(error){
-      DebugLog(error)
+
+      setTitle(title);
+      setContent(content);
+      setErrorDialog(true);
+    } catch (error) {
+      DebugLog(error);
     }
-   
   }
-
-
 
   //  login button click listener
   function goToDashboard() {
     setAuthStatus(false);
     navigate(CONSTANT.FINANCE_DASHBOARD);
   }
+
   return (
     <Box>
       <SnackbarProvider maxSnack={3}>
         <ConnectionStatus />
-         <ShowErrorAlertDialog status={getDialogStatus} title={title} content={content} />
+        <ShowErrorAlertDialog
+          status={getDialogStatus}
+          title={title}
+          content={content}
+        />
         {isNetworkConnectionAvailable ? (
           <CustomProgressDialog open={loading} text={getProgressbarText} />
         ) : (
@@ -323,9 +370,6 @@ function LoginFieldBox() {
 }
 
 export default LoginFieldBox;
-
-const phoneRegExp =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
 
 const checkoutSchema = yup.object().shape({
   emailValue: yup.string().required("required"),

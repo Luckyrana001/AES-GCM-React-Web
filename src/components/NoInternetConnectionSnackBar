@@ -1,0 +1,15 @@
+const isNetworkConnectionAvailable = UseOnlineStatus();
+const { enqueueSnackbar } = useSnackbar();
+
+  const showNoInternetSnackBar() {
+    if (isNetworkConnectionAvailable) {
+      enqueueSnackbar(YOU_ARE_ONLINE);
+    } else {
+      enqueueSnackbar(YOU_ARE_OFFLINE, {
+        autoHideDuration: 3000,
+        variant: "error",
+      });
+    }
+  };
+
+  export default showNoInternetSnackBar

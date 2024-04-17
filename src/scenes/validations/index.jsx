@@ -6,7 +6,7 @@ import SimpleTable from "../../components/SimpleTable";
 import Grid from "@mui/material/Unstable_Grid2"; // Grid version 2
 import * as React from "react";
 
-const Payouts = () => {
+const ValidationScreen = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   
@@ -62,5 +62,5 @@ const Payouts = () => {
   );
 };
 
-export default Payouts;
+export default ValidationScreen;
 

@@ -18,11 +18,16 @@ const CustomProgressDialog = ({open, text }) => {
   const handleClose = () => {
     setDialogOpen(false);
   };
-
+// Prevent clicks on the progress indicator itself from affecting the loading state
+const handleProgressClick = (event) => {
+  event.stopPropagation();
+};
   return (
+    <div  onClick={handleProgressClick}>
     <Dialog open={dialogOpen} onClose={handleClose}>
       <DialogContent>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} 
+     >
       <CircularProgress />
       <Typography variant="body1" component="div" color="textSecondary" style={{ marginTop: 10 }}>
         {text}
@@ -30,6 +35,7 @@ const CustomProgressDialog = ({open, text }) => {
     </div>
       </DialogContent>
     </Dialog>
+    </div>
   );
 };
 

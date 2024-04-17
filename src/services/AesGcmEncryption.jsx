@@ -1,22 +1,21 @@
-import { getFromLocalStorage } from "../utils/localStorageUtils";
+import DebugLog from "../utils/DebugLog";
 
+ export async function initializeEncryption(data,keyBase64,apiTag) {
+  DebugLog(apiTag+"----Plain Request data---   "+JSON.stringify(data));
 
-
-//const keyBase64 = "70vNajEqkT4tUmXx7gNzBA==";
-//const keyBase64 = getFromLocalStorage("messageKey");
-const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
-
-
- export async function initializeEncryption(signInData,keyBase64) {
-
-  const CryptoJS = require("crypto-js");
-
-  const encryptAES = (plaintext, keyBase64) => {
-    const encrypted = CryptoJS.AES.encrypt(plaintext, keyBase64).toString();
-    return encrypted;
-  };
+  // this code use AES ECB mode
+  return await  encryptWithAesEcb(keyBase64, JSON.stringify(data))
+  .then((encryptedData) => {
+            DebugLog(apiTag+"----Encrypted Content Data---   "+encryptedData);
+            return encryptedData
+          })
+          .catch((error) => {
+            console.error(error);
+          });
    
-}
+   }
+
+// below code is for AES-GCM Encryption , 
 //  return await  encryptData(keyBase64, JSON.stringify(signInData), rawIv)
 //       .then((encryptedData) => {
 //         console.log("encrypted login data-------   "+encryptedData);
@@ -26,6 +25,14 @@ const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
 //         console.error(error);
 //       });
 //   }
+
+ async function encryptWithAesEcb(keyBase64, data ){
+ 
+  const CryptoJS = require("crypto-js");
+  const encrypted = CryptoJS.AES.encrypt(data, keyBase64).toString();
+    return encrypted;
+ // return btoa(String.fromCharCode(...encryptedBytes));
+ }
 
   
 
@@ -84,7 +91,7 @@ const rawIv = "AAAAAAAAAAAAAAAAAAAAAA==";
       ["decrypt"]
     );
 
-    const iV = convertStringIntoBase64ToUint8Array(rawIv);
+    const iV = convertStringIntoBase64ToUint8Array(process.env.REACT_APP_ENCRYPTION_IV);
 
     const decryptedData = await window.crypto.subtle.decrypt(
       {

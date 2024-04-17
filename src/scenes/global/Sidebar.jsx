@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from 'react';
+
 
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme, Icon } from "@mui/material";
@@ -19,10 +20,10 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import { isAuthPageAtom } from "../../config/AppConfig";
+import { collapseMenu, isAuthPageAtom, openSlidingMenu } from "../../config/AppConfig";
 import { useAtom } from "jotai";
 import { BackButtonListener } from "../../components/BackButtonListener";
-import { FINANCE_DASHBOARD } from "../../constants/Constant";
+import { ADJUSTMENT_ROUTE, CREDIT_DEBIT_ROUTE, EARMARK_ROUTE, EXCLUSION_ROUTE, FINANCE_DASHBOARD, FREEZE_ACCOUNT_ROUTE, ON_HOLD_ROUTE, PAYOUT_DATES_ROUTE, PAYOUT_ROUTE, REPORTS_ROUTE, VALIDATION_ROUTE, WITHOLDING_TAX_ROUTE } from "../../constants/Constant";
 
 /* NEW ICONS */
 
@@ -38,9 +39,16 @@ import CalculateOutlinedIcon from '@mui/icons-material/CalculateOutlined';
 import AcUnitOutlinedIcon from '@mui/icons-material/AcUnitOutlined';
 import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined';
 
+
+import { useContext } from 'react';
+import { SidebarContext } from '../../scenes/global/context/sidebarContext.jsx';
+import { ADJUSTMENT, CREDIT_DEBIT, DASHBOARD, EARMARK, EXCLUSION, FREEZE_ACCOUNT, ON_HOLD, PAYOUT, PAYOUT_DATES, REPORTS, VALIDATIONS, WITHOLDING_TAX } from "../../constants/Strings.jsx";
+import ValidationScreen from "../validations/index.jsx";
+
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
 
   return (
     <MenuItem
@@ -71,18 +79,40 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useAtom(collapseMenu);
+  //const [isVisible, setIsVisible] = useAtom(false);
 
   const [selected, setSelected] = useState("Dashboard");
   const [isAuthPage, setAuthStatus] = useAtom(isAuthPageAtom);
+  const [slidingMenuStatus, setSlidingMenu] = useAtom(openSlidingMenu)
+
+
+
+  // reducer and context listening
+  const [activeLinkIdx] = useState(3);
+  const [sidebarClass, setSidebarClass] = useState("");
+  const { isSidebarOpen } = useContext(SidebarContext);
+
+  useEffect(() => {
+   // setIsVisible(openSlidingMenu)
+    //setSlidingMenu(openSlidingMenu);
+   // setIsCollapsed(openSlidingMenu)
+
+
+    if(isSidebarOpen){
+      setSidebarClass('sidebar-change');
+    } else {
+      setSidebarClass('');
+    }
+  }, [isSidebarOpen,openSlidingMenu,collapseMenu]);
+
 
   return (
-    <div>
+    <div className={ `sidebar ${sidebarClass}` }>
       {!isAuthPage ? (
         <Box
           alignItems={"space-around"}
-          visibility={isVisible}
+         // visibility={isVisible}
           sx={{
             "& .pro-sidebar-inner": {
               background: `${colors.white[50]} !important`,
@@ -103,14 +133,14 @@ const Sidebar = () => {
               fontFamily: "Montserrat-Bold",
               fontWeight: "900 !important",
             },
-            display: { xs: "none", sm: "block"},
-            height: "120vh",
+            //display: { xs: "none", sm: "block"},
+            //height: "120vh",
             // position: "fixed",
             zIndex: "1000",
             // width: "270px",
           }}
         >
-          {/* <BackButtonListener></BackButtonListener> */}
+          <BackButtonListener></BackButtonListener>
           
 
           <ProSidebar collapsed={isCollapsed} sx={{height:"100vh"}}>
@@ -131,9 +161,7 @@ const Sidebar = () => {
                     alignItems="center"
                     ml="15px"
                   >
-                    {/* <Typography variant="h3" color={colors.grey[200]}>
-                  ADMINIS
-                </Typography> */}
+                    
                     <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                       <MenuOutlinedIcon />
                     </IconButton>
@@ -156,7 +184,7 @@ const Sidebar = () => {
 
               <Box pt={2} paddingLeft={isCollapsed ? undefined : "10%"}>
                 <Item
-                  title="Dashboard"
+                   title={DASHBOARD}
                   to={FINANCE_DASHBOARD}
                   icon={<OtherHousesOutlinedIcon />}
                   selected={selected}
@@ -172,30 +200,30 @@ const Sidebar = () => {
                   Incentive
                 </Typography> */}
                 <Item
-                  title="Validations"
-                  to="/validations"
+                   title={VALIDATIONS}
+                  to={VALIDATION_ROUTE}
                   icon={<GppMaybeOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
 
                 <Item
-                  title="Payout"
-                  to="/payoutsArchive"
+                    title={PAYOUT}
+                  to={PAYOUT_ROUTE}
                   icon={<CurrencyExchangeOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="On-Hold"
-                  to="/onhold"
+                 title={ON_HOLD}
+                  to={ON_HOLD_ROUTE}
                   icon={<PauseOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="Exclusions"
-                  to="/form"
+                 title={EXCLUSION}
+                  to={EXCLUSION_ROUTE}
                   icon={<DoNotDisturbAltOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
@@ -208,15 +236,15 @@ const Sidebar = () => {
                   setSelected={setSelected}
                 /> */}
                 <Item
-                  title="Payout Dates"
-                  to="/form"
+                 title={PAYOUT_DATES}
+                  to={PAYOUT_DATES_ROUTE}
                   icon={<CalendarTodayOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="Witholding Tax"
-                  to="/faq"
+                 title={WITHOLDING_TAX}
+                  to={WITHOLDING_TAX_ROUTE}
                   icon={<PersonRemoveOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
@@ -230,30 +258,30 @@ const Sidebar = () => {
                 </Typography> */}
 
                 <Item
-                  title="Reports"
-                  to="/team"
+                 title={REPORTS}
+                  to={REPORTS_ROUTE}
                   icon={<ArticleOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
 
                 <Item
-                  title="Adjustments"
-                  to="/team"
+                    title={ADJUSTMENT}
+                  to={ADJUSTMENT_ROUTE}
                   icon={<CalculateOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="Earmark"
-                  to="/contacts"
+                   title={EARMARK}
+                  to={EARMARK_ROUTE}
                   icon={<ContactsOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
                 />
                 <Item
-                  title="Freeze Accounts"
-                  to="/invoices"
+                   title={FREEZE_ACCOUNT}
+                  to={FREEZE_ACCOUNT_ROUTE}
                   icon={<AcUnitOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}
@@ -267,8 +295,8 @@ const Sidebar = () => {
                   Pages
                 </Typography> */}
                 <Item
-                  title="Credit Debit"
-                  to="/form"
+                  title={CREDIT_DEBIT}
+                  to={CREDIT_DEBIT_ROUTE}
                   icon={<PercentOutlinedIcon />}
                   selected={selected}
                   setSelected={setSelected}

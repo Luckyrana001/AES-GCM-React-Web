@@ -4,63 +4,79 @@ import { tokens } from "../../theme";
 import { mockDataContacts } from "../../data/mockData";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
+import { AlignVerticalCenter } from "@mui/icons-material";
+import SectionHeader from "../../components/SectionHeader";
 
 const Contacts = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "registrarId", headerName: "Registrar ID" },
+    { field: "id", headerName: "ID", flex: .5 , headerAlign: 'left', cellClassName: 'super-app-theme--cell'},
+    { field: "registrarId", headerName: "REGISTER ID",flex: 1 , headerAlign: 'left',  AlignVerticalCenter: true, },
     {
       field: "name",
-      headerName: "Name",
+      headerName: "NAME",
       flex: 1,
       cellClassName: "name-column--cell",
+      headerAlign: 'left',
     },
     {
       field: "age",
-      headerName: "Age",
+      flex: .5,
+      headerName: "AGE",
       type: "number",
       headerAlign: "left",
       align: "left",
+      headerAlign: 'left',
     },
     {
       field: "phone",
-      headerName: "Phone Number",
+      headerName: "PHONE NUMBER",
       flex: 1,
+      headerAlign: 'left',
     },
     {
       field: "email",
-      headerName: "Email",
+      headerName: "EMAIL",
       flex: 1,
+      headerAlign: 'left',
     },
     {
       field: "address",
-      headerName: "Address",
+      headerName: "ADDRESS",
       flex: 1,
+      headerAlign: 'left',
     },
     {
       field: "city",
-      headerName: "City",
+      headerName: "CITY",
       flex: 1,
+      headerAlign: 'left',
     },
     {
       field: "zipCode",
-      headerName: "Zip Code",
+      headerName: "ZIPCODE",
       flex: 1,
+      headerAlign: 'left',
     },
   ];
 
   return (
-    <Box m="20px">
+    <Box m="50px">
       <Header
         title="CONTACTS"
         subtitle="List of Contacts for Future Reference"
       />
+
+      <SectionHeader
+          sectionIcon={"../../assets/common/Payouts.svg"}
+          sectionHeading={"Payouts"}
+        ></SectionHeader>
       <Box
-        m="40px 0 0 0"
-        height="75vh"
+        m="0px 0 0 0"
+        pb={20}
+        height="120vh"
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
@@ -69,27 +85,35 @@ const Contacts = () => {
             borderBottom: "none",
           },
           "& .name-column--cell": {
-            color: colors.greenAccent[300],
+            color: colors.redAccent[200], fontWeight: 'bold', fontSize:13
+           
           },
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor:"rgba(255,255,255,0.6)",
             borderBottom: "none",
+            fontWeight: 'bold',
+            fontSize: '13px',
+            color: `${colors.grey[300]} !important`,
           },
           "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
+            background: "rgba(255,255,255,1)"
           },
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
+            backgroundColor: "rgba(255,255,255,0.6)",
           },
           "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
+            color: `${colors.white[200]} !important`,
           },
           "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
+          //  color: `${colors.grey[100]} !important`,
+          //backgroundColor: "rgba(255,255,255,0.6)",
+         // opacity:.5
+        
           },
         }}
       >
+        
         <DataGrid
           rows={mockDataContacts}
           columns={columns}
